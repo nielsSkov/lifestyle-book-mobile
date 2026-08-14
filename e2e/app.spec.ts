@@ -71,6 +71,7 @@ test('exposes a complete installable manifest', async ({ request }) => {
   const manifest = await manifestResponse.json()
 
   expect(manifest.name).toBe('Lifestyle Book')
+  expect(manifest.short_name).toBe('Lifestyle Book')
   expect(manifest.display).toBe('standalone')
   expect(manifest.icons).toHaveLength(3)
   for (const icon of manifest.icons) {

@@ -13,7 +13,7 @@ export default defineConfig({
       includeAssets: ['app-icon.svg', 'apple-touch-icon.png'],
       manifest: {
         name: 'Lifestyle Book',
-        short_name: 'Lifestyle',
+        short_name: 'Lifestyle Book',
         description: 'A calm, offline record of weight progress.',
         theme_color: '#0c0912',
         background_color: '#0c0912',

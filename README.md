@@ -30,6 +30,14 @@ npm ci
 npm run dev
 ```
 
+Deploy the latest production build to the persistent LAN preview:
+
+```bash
+npm run preview:lan:deploy
+```
+
+The preview is available at `http://192.168.0.172:4173/` while the Linux server is running.
+
 The development server prints a local URL. Open it in a browser on the same network.
 
 ## Quality gate

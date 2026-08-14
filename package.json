@@ -15,6 +15,7 @@
     "test:e2e": "npm run build && playwright test",
     "test:pages": "npm run build:pages && PLAYWRIGHT_BASE_PATH=/lifestyle-book-mobile/ playwright test",
     "preview": "vite preview",
+    "preview:lan:deploy": "bash scripts/deploy-lan-preview.sh",
     "cap:sync": "npm run build && cap sync android",
     "cap:open": "cap open android",
     "android:check": "npm run cap:sync && ./android/gradlew -p android lint testDebugUnitTest assembleDebug bundleRelease",

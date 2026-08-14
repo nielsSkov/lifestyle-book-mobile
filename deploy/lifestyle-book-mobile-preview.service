@@ -1,0 +1,12 @@
+[Unit]
+Description=Lifestyle Book mobile LAN preview
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 -m http.server 4173 --bind 192.168.0.172 --directory /home/niels/lifestyle-book-mobile/current
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

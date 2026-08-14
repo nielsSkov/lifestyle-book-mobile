@@ -3,6 +3,7 @@ import { lazy, Suspense, useEffect, useState } from 'react'
 import './App.css'
 import { InstallButton } from './components/InstallButton'
 import { loadWeightPoints } from './data/weightRepository'
+import { recordSubtitle } from './domain/lifestyleSettings'
 import type { WeightPoint } from './domain/weight'
 import { formatMeasurementDate } from './domain/weight'
 
@@ -36,7 +37,7 @@ export default function App() {
       <header className="site-header">
         <a className="site-title" href={import.meta.env.BASE_URL}>
           <span>Lifestyle Book</span>
-          <small>Niels' log</small>
+          <small>{recordSubtitle()}</small>
         </a>
         <InstallButton />
       </header>

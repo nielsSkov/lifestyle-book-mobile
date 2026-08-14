@@ -12,6 +12,8 @@ describe('App', () => {
     render(<App />)
 
     expect(screen.getByRole('heading', { name: 'Weight' })).toBeInTheDocument()
+    expect(screen.getByText('Everyday log')).toBeInTheDocument()
+    expect(screen.getByText('Daily record')).toBeInTheDocument()
     expect(await screen.findByText('Plotly weight graph rendered')).toBeInTheDocument()
     expect(screen.getByText('77.2')).toBeInTheDocument()
   })

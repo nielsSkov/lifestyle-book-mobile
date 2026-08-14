@@ -5,7 +5,7 @@ A small, offline-first weight-history application built once for browsers, insta
 ## Prototype scope
 
 - One polished and accessible weight graph
-- Local IndexedDB persistence with representative seed data
+- Local IndexedDB persistence with representative weight data and an explicit representative plan
 - Complete offline startup through a service worker
 - Installable from Safari on iPad and supporting browsers elsewhere
 - Self-contained Capacitor Android application
@@ -14,7 +14,7 @@ A small, offline-first weight-history application built once for browsers, insta
 ## Stack
 
 - React 19, TypeScript, and Vite
-- Recharts for the responsive SVG graph
+- Plotly.js for zoom, pan, reset, touch inspection, and responsive graph rendering
 - IndexedDB through `idb`
 - Workbox through `vite-plugin-pwa`
 - Capacitor for Android packaging

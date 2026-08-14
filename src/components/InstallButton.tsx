@@ -28,7 +28,7 @@ export function InstallButton() {
         {message}
       </span>
     )
-  if (!prompt && !isIos) return <span className="prototype-label">Prototype 01</span>
+  if (!prompt && !isIos) return null
 
   return (
     <div className="install-control">

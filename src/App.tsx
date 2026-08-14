@@ -36,7 +36,7 @@ export default function App() {
       <header className="site-header">
         <a className="site-title" href={import.meta.env.BASE_URL}>
           <span>Lifestyle Book</span>
-          <small>Personal tracker</small>
+          <small>Niels' log</small>
         </a>
         <InstallButton />
       </header>
@@ -44,6 +44,7 @@ export default function App() {
       <main>
         <section className="page-heading">
           <div>
+            <p className="eyebrow">Daily record</p>
             <h1>Weight</h1>
           </div>
           {latest ? (

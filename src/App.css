@@ -1,0 +1,295 @@
+.app-shell {
+  width: min(100% - 32px, 920px);
+  margin-inline: auto;
+  padding: max(22px, env(safe-area-inset-top)) 0 max(28px, env(safe-area-inset-bottom));
+}
+
+.topbar,
+.brand,
+.card-heading,
+.measurement,
+.chart-controls,
+footer {
+  display: flex;
+  align-items: center;
+}
+
+.topbar {
+  justify-content: space-between;
+}
+.brand {
+  gap: 10px;
+  color: var(--ink);
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  font-size: 0.78rem;
+}
+.brand-mark {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  background: var(--lime);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--lime) 55%, transparent);
+}
+.prototype-label {
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+.install-control {
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+}
+.install-message {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: min(78vw, 300px);
+  color: var(--muted);
+  font-size: 0.72rem;
+  text-align: right;
+}
+.install-message-inline {
+  color: var(--muted);
+  font-size: 0.72rem;
+  text-align: right;
+}
+.install-button {
+  min-height: 44px;
+  padding: 8px 13px;
+  border-radius: 999px;
+}
+
+.intro {
+  max-width: 620px;
+  margin: clamp(58px, 11vw, 102px) 0 38px;
+}
+.eyebrow,
+.card-kicker,
+.measurement-label {
+  color: var(--lime);
+  font-size: 0.69rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+.intro h1 {
+  margin: 10px 0 13px;
+  max-width: 580px;
+  color: var(--ink);
+  font-size: clamp(2.35rem, 7vw, 4.5rem);
+  line-height: 0.99;
+  letter-spacing: -0.055em;
+}
+.lede {
+  color: var(--muted);
+  font-size: clamp(1rem, 2.5vw, 1.14rem);
+}
+
+.chart-card {
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  padding: clamp(18px, 4vw, 30px);
+  background: linear-gradient(145deg, rgba(37, 48, 39, 0.94), rgba(23, 30, 25, 0.98));
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.28);
+}
+.card-heading {
+  justify-content: space-between;
+  gap: 20px;
+}
+.card-kicker {
+  margin: 0 0 5px;
+  color: var(--muted);
+}
+.card-heading h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 1.35rem;
+  letter-spacing: -0.025em;
+}
+.change-pill {
+  flex: none;
+  padding: 8px 12px;
+  border-radius: 999px;
+  color: var(--lime);
+  background: var(--lime-wash);
+  font-size: 0.78rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.measurement {
+  min-height: 88px;
+  justify-content: space-between;
+  gap: 18px;
+  margin: 18px 0 8px;
+}
+.measurement > div {
+  display: grid;
+  gap: 5px;
+}
+.measurement-label {
+  color: var(--muted);
+  font-size: 0.62rem;
+}
+.measurement strong {
+  color: var(--ink);
+  font-size: clamp(0.95rem, 3vw, 1.15rem);
+}
+.measurement output {
+  color: var(--ink);
+  font-size: clamp(2.4rem, 9vw, 4.1rem);
+  font-weight: 800;
+  letter-spacing: -0.055em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.measurement small {
+  color: var(--muted);
+  font-size: 0.34em;
+  letter-spacing: 0;
+}
+.chart-wrap {
+  height: clamp(260px, 45vw, 360px);
+  margin-inline: -8px;
+  touch-action: pan-y;
+}
+.recharts-cartesian-axis-tick-value {
+  font-size: 0.75rem;
+}
+.tooltip {
+  display: grid;
+  gap: 2px;
+  padding: 9px 11px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: #111713;
+  box-shadow: 0 9px 24px rgba(0, 0, 0, 0.3);
+}
+.tooltip span {
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+.tooltip strong {
+  color: var(--ink);
+  font-size: 0.9rem;
+}
+.chart-controls {
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+}
+.chart-scrubber {
+  display: grid;
+  flex: 1;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 0.7rem;
+  text-align: center;
+}
+.chart-scrubber input {
+  width: min(100%, 250px);
+  margin: 0 auto;
+  accent-color: var(--lime);
+}
+button {
+  border: 1px solid var(--line);
+  color: var(--ink);
+  background: var(--surface-raised);
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 750;
+  cursor: pointer;
+}
+.chart-controls button {
+  min-height: 48px;
+  padding: 8px 12px;
+  border-radius: 12px;
+}
+button:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--lime) 55%, var(--line));
+}
+button:focus-visible,
+a:focus-visible {
+  outline: 3px solid var(--lime);
+  outline-offset: 3px;
+}
+button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.chart-state {
+  min-height: 390px;
+  display: grid;
+  place-content: center;
+  gap: 5px;
+  color: var(--muted);
+  text-align: center;
+}
+.chart-state strong {
+  color: var(--ink);
+  font-size: 1.1rem;
+}
+.chart-state button {
+  justify-self: center;
+  min-height: 48px;
+  margin-top: 12px;
+  padding: 8px 16px;
+  border-radius: 12px;
+}
+
+footer {
+  justify-content: center;
+  gap: 8px;
+  margin-top: 32px;
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+.offline-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--lime);
+}
+
+@media (max-width: 560px) {
+  .app-shell {
+    width: min(100% - 22px, 920px);
+  }
+  .chart-card {
+    border-radius: 22px;
+  }
+  .measurement {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .measurement output {
+    align-self: flex-end;
+  }
+  .chart-controls {
+    flex-wrap: wrap;
+  }
+  .chart-scrubber {
+    order: 3;
+    flex-basis: 100%;
+  }
+  .chart-controls button {
+    flex: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition: none !important;
+    animation: none !important;
+  }
+}

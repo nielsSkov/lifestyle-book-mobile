@@ -1,0 +1,43 @@
+@import '@fontsource-variable/manrope';
+
+:root {
+  font-family: Manrope, ui-sans-serif, system-ui, sans-serif;
+  color: #e8eee7;
+  background: #101511;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  --background: #101511;
+  --surface-raised: #252f27;
+  --ink: #edf1ea;
+  --muted: #9ba49c;
+  --line: #58685d;
+  --lime: #b7ef68;
+  --lime-wash: rgba(183, 239, 104, 0.1);
+}
+
+* {
+  box-sizing: border-box;
+}
+html {
+  min-width: 320px;
+  min-height: 100%;
+  background: var(--background);
+}
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  background: radial-gradient(circle at 30% -10%, #283a2a 0, var(--background) 37rem);
+}
+button,
+input {
+  font: inherit;
+}
+
+@media (display-mode: standalone) {
+  body {
+    user-select: none;
+    -webkit-user-select: none;
+  }
+}

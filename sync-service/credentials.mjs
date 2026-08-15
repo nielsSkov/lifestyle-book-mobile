@@ -1,31 +1,55 @@
-import { createCipheriv, createDecipheriv, randomBytes } from 'node:crypto'
-
-const algorithm = 'aes-256-gcm'
 const ivLength = 12
-const tagLength = 16
 
 export function parseEncryptionKey(value) {
-  const key = Buffer.from(value, 'base64')
+  const key = fromBase64(value)
   if (key.length !== 32) throw new Error('CREDENTIAL_ENCRYPTION_KEY must contain 32 base64 bytes')
   return key
 }
 
-export function seal(payload, key) {
-  const iv = randomBytes(ivLength)
-  const cipher = createCipheriv(algorithm, key, iv)
-  const encrypted = Buffer.concat([cipher.update(JSON.stringify(payload), 'utf8'), cipher.final()])
-  return Buffer.concat([iv, cipher.getAuthTag(), encrypted]).toString('base64url')
+export async function seal(payload, key) {
+  const iv = crypto.getRandomValues(new Uint8Array(ivLength))
+  const cryptoKey = await crypto.subtle.importKey('raw', key, 'AES-GCM', false, ['encrypt'])
+  const encrypted = new Uint8Array(
+    await crypto.subtle.encrypt(
+      { name: 'AES-GCM', iv },
+      cryptoKey,
+      new TextEncoder().encode(JSON.stringify(payload)),
+    ),
+  )
+  return toBase64Url(concatenate(iv, encrypted))
 }
 
-export function unseal(value, key) {
-  const encoded = Buffer.from(value, 'base64url')
-  if (encoded.length <= ivLength + tagLength) throw new Error('Invalid sealed credential')
+export async function unseal(value, key) {
+  const encoded = fromBase64Url(value)
+  if (encoded.length <= ivLength + 16) throw new Error('Invalid sealed credential')
 
-  const iv = encoded.subarray(0, ivLength)
-  const tag = encoded.subarray(ivLength, ivLength + tagLength)
-  const encrypted = encoded.subarray(ivLength + tagLength)
-  const decipher = createDecipheriv(algorithm, key, iv)
-  decipher.setAuthTag(tag)
-  const decrypted = Buffer.concat([decipher.update(encrypted), decipher.final()])
-  return JSON.parse(decrypted.toString('utf8'))
+  const cryptoKey = await crypto.subtle.importKey('raw', key, 'AES-GCM', false, ['decrypt'])
+  const decrypted = await crypto.subtle.decrypt(
+    { name: 'AES-GCM', iv: encoded.slice(0, ivLength) },
+    cryptoKey,
+    encoded.slice(ivLength),
+  )
+  return JSON.parse(new TextDecoder().decode(decrypted))
+}
+
+function concatenate(left, right) {
+  const value = new Uint8Array(left.length + right.length)
+  value.set(left)
+  value.set(right, left.length)
+  return value
+}
+
+function fromBase64(value) {
+  return Uint8Array.from(atob(value), (character) => character.charCodeAt(0))
+}
+
+function fromBase64Url(value) {
+  return fromBase64(value.replaceAll('-', '+').replaceAll('_', '/'))
+}
+
+function toBase64Url(value) {
+  return btoa(String.fromCharCode(...value))
+    .replaceAll('+', '-')
+    .replaceAll('/', '_')
+    .replace(/=+$/, '')
 }

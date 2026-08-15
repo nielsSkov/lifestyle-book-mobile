@@ -12,6 +12,8 @@
     "format:write": "prettier --write .",
     "test": "vitest run --coverage",
     "test:sync-service": "node --test sync-service/*.test.mjs",
+    "sync-service:dev": "wrangler dev --config sync-service/wrangler.jsonc",
+    "sync-service:deploy": "wrangler deploy --config sync-service/wrangler.jsonc",
     "test:watch": "vitest",
     "test:e2e": "npm run build && playwright test",
     "test:pages": "npm run build:pages && PLAYWRIGHT_BASE_PATH=/lifestyle-book-mobile/ playwright test",
@@ -52,7 +54,8 @@
     "typescript": "~6.0.2",
     "vite": "^8.2.0",
     "vite-plugin-pwa": "^1.3.0",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.10",
+    "wrangler": "^4.123.0"
   },
   "engines": {
     "node": "22.x"

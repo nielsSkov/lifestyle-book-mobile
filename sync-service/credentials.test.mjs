@@ -5,23 +5,23 @@ import { describe, it } from 'node:test'
 import { parseEncryptionKey, seal, unseal } from './credentials.mjs'
 
 describe('sealed credentials', () => {
-  it('round trips an authenticated payload', () => {
+  it('round trips an authenticated payload', async () => {
     const key = randomBytes(32)
-    const sealed = seal({ kind: 'credential', refreshToken: 'secret' }, key)
+    const sealed = await seal({ kind: 'credential', refreshToken: 'secret' }, key)
 
-    assert.deepEqual(unseal(sealed, key), {
+    assert.deepEqual(await unseal(sealed, key), {
       kind: 'credential',
       refreshToken: 'secret',
     })
   })
 
-  it('rejects tampering', () => {
+  it('rejects tampering', async () => {
     const key = randomBytes(32)
-    const sealed = seal({ kind: 'credential', refreshToken: 'secret' }, key)
+    const sealed = await seal({ kind: 'credential', refreshToken: 'secret' }, key)
     const tampered = Buffer.from(sealed, 'base64url')
     tampered[tampered.length - 1] ^= 1
 
-    assert.throws(() => unseal(tampered.toString('base64url'), key))
+    await assert.rejects(() => unseal(tampered.toString('base64url'), key))
   })
 
   it('requires exactly 32 bytes of key material', () => {

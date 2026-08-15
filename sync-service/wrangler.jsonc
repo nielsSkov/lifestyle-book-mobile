@@ -1,0 +1,7 @@
+{
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "lifestyle-book-sync",
+  "main": "worker.mjs",
+  "compatibility_date": "2026-08-15",
+  "workers_dev": true,
+}

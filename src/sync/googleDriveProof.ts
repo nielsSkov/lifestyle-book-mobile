@@ -1,0 +1,170 @@
+const credentialStorageKey = 'lifestyle-book.google-drive-credential'
+const driveApiUrl = 'https://www.googleapis.com/drive/v3'
+const driveUploadUrl = 'https://www.googleapis.com/upload/drive/v3'
+const folderName = 'Lifestyle Book'
+const proofFileName = 'weight.csv'
+
+type Fetch = typeof fetch
+type Storage = Pick<globalThis.Storage, 'getItem' | 'setItem' | 'removeItem'>
+
+export class GoogleDriveProofClient {
+  private readonly serviceUrl: string
+  private readonly returnUrl: string
+  private readonly storage: Storage
+  private readonly request: Fetch
+
+  constructor(
+    serviceUrl: string,
+    returnUrl: string,
+    storage: Storage = localStorage,
+    request: Fetch = fetch,
+  ) {
+    this.serviceUrl = serviceUrl
+    this.returnUrl = returnUrl
+    this.storage = storage
+    this.request = request
+  }
+
+  get configured(): boolean {
+    return this.serviceUrl.length > 0
+  }
+
+  get connected(): boolean {
+    return this.storage.getItem(credentialStorageKey) !== null
+  }
+
+  get connectionUrl(): string {
+    const url = new URL('/oauth/start', this.serviceUrl)
+    url.searchParams.set('return_url', this.returnUrl)
+    return url.href
+  }
+
+  acceptRedirect(hash: string): { connected: boolean; error: string } {
+    const parameters = new URLSearchParams(hash.replace(/^#/, ''))
+    const credential = parameters.get('google-drive-credential')
+    const error = parameters.get('google-drive-error') ?? ''
+    if (credential) this.storage.setItem(credentialStorageKey, credential)
+    return { connected: credential !== null, error }
+  }
+
+  forget(): void {
+    this.storage.removeItem(credentialStorageKey)
+  }
+
+  async readWeightCsv(): Promise<string> {
+    const accessToken = await this.accessToken()
+    const folderId = await this.findOrCreateFolder(accessToken)
+    const fileId = await this.findFile(accessToken, folderId)
+    if (!fileId) return 'date,weight_kg\n'
+
+    const response = await this.driveRequest(
+      `${driveApiUrl}/files/${encodeURIComponent(fileId)}?alt=media`,
+      accessToken,
+    )
+    return response.text()
+  }
+
+  async writeWeightCsv(content: string): Promise<void> {
+    const accessToken = await this.accessToken()
+    const folderId = await this.findOrCreateFolder(accessToken)
+    const existingFileId = await this.findFile(accessToken, folderId)
+    const fileId = existingFileId ?? (await this.createFile(accessToken, folderId))
+    await this.driveRequest(
+      `${driveUploadUrl}/files/${encodeURIComponent(fileId)}?uploadType=media`,
+      accessToken,
+      { method: 'PATCH', headers: { 'content-type': 'text/csv' }, body: content },
+    )
+  }
+
+  async revoke(): Promise<void> {
+    const credential = this.credential()
+    const response = await this.request(new URL('/revoke', this.serviceUrl), {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ credential }),
+    })
+    if (!response.ok) throw new Error('Google access could not be revoked')
+    this.forget()
+  }
+
+  private async accessToken(): Promise<string> {
+    const response = await this.request(new URL('/token', this.serviceUrl), {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ credential: this.credential() }),
+    })
+    if (!response.ok) throw new Error('Google Drive must be reconnected')
+    const result = (await response.json()) as { accessToken?: string }
+    if (!result.accessToken) throw new Error('The credential service returned no access token')
+    return result.accessToken
+  }
+
+  private credential(): string {
+    const credential = this.storage.getItem(credentialStorageKey)
+    if (!credential) throw new Error('Google Drive is not connected')
+    return credential
+  }
+
+  private async findOrCreateFolder(accessToken: string): Promise<string> {
+    const query = `name = '${folderName}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`
+    const existing = await this.listFiles(accessToken, query)
+    if (existing[0]) return existing[0].id
+
+    const response = await this.driveRequest(`${driveApiUrl}/files?fields=id`, accessToken, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ name: folderName, mimeType: 'application/vnd.google-apps.folder' }),
+    })
+    return ((await response.json()) as { id: string }).id
+  }
+
+  private async findFile(accessToken: string, folderId: string): Promise<string | null> {
+    const files = await this.listFiles(
+      accessToken,
+      `name = '${proofFileName}' and '${folderId}' in parents and trashed = false`,
+    )
+    return files[0]?.id ?? null
+  }
+
+  private async createFile(accessToken: string, folderId: string): Promise<string> {
+    const response = await this.driveRequest(`${driveApiUrl}/files?fields=id`, accessToken, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ name: proofFileName, parents: [folderId], mimeType: 'text/csv' }),
+    })
+    return ((await response.json()) as { id: string }).id
+  }
+
+  private async listFiles(accessToken: string, query: string): Promise<Array<{ id: string }>> {
+    const url = new URL(`${driveApiUrl}/files`)
+    url.searchParams.set('q', query)
+    url.searchParams.set('spaces', 'drive')
+    url.searchParams.set('fields', 'files(id)')
+    const response = await this.driveRequest(url, accessToken)
+    return ((await response.json()) as { files: Array<{ id: string }> }).files
+  }
+
+  private async driveRequest(
+    url: string | URL,
+    accessToken: string,
+    init: RequestInit = {},
+  ): Promise<Response> {
+    const headers = new Headers(init.headers)
+    headers.set('authorization', `Bearer ${accessToken}`)
+    const response = await this.request(url, { ...init, headers })
+    if (!response.ok) throw new Error('Google Drive rejected the request')
+    return response
+  }
+}
+
+export function updateProofWeightCsv(csv: string, date: string, kilograms: number): string {
+  const records = new Map<string, number>()
+  for (const line of csv.trim().split(/\r?\n/).slice(1)) {
+    const [recordDate, value] = line.split(',')
+    if (recordDate && value && Number.isFinite(Number(value)))
+      records.set(recordDate, Number(value))
+  }
+  records.set(date, kilograms)
+  const lines = [...records].toSorted(([left], [right]) => left.localeCompare(right))
+  return `date,weight_kg\n${lines.map(([recordDate, value]) => `${recordDate},${value.toFixed(1)}`).join('\n')}\n`
+}

@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
 
 import './App.css'
+import { GoogleDriveProof } from './components/GoogleDriveProof'
 import { InstallButton } from './components/InstallButton'
 import { loadWeightPoints } from './data/weightRepository'
 import { recordSubtitle } from './domain/lifestyleSettings'
@@ -84,6 +85,7 @@ export default function App() {
             </Suspense>
           )}
         </section>
+        <GoogleDriveProof />
       </main>
     </>
   )

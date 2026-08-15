@@ -29,6 +29,8 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: npm run test:pages
+        env:
+          VITE_GOOGLE_SYNC_SERVICE_URL: ${{ vars.GOOGLE_SYNC_SERVICE_URL }}
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:

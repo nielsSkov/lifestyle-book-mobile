@@ -11,6 +11,7 @@
     "format": "prettier --check .",
     "format:write": "prettier --write .",
     "test": "vitest run --coverage",
+    "test:sync-service": "node --test sync-service/*.test.mjs",
     "test:watch": "vitest",
     "test:e2e": "npm run build && playwright test",
     "test:pages": "npm run build:pages && PLAYWRIGHT_BASE_PATH=/lifestyle-book-mobile/ playwright test",
@@ -19,7 +20,7 @@
     "cap:sync": "npm run build && cap sync android",
     "cap:open": "cap open android",
     "android:check": "npm run cap:sync && ./android/gradlew -p android lint testDebugUnitTest assembleDebug bundleRelease",
-    "ci": "npm run format && npm run lint && npm run test && npm run build && npm run test:e2e"
+    "ci": "npm run format && npm run lint && npm run test && npm run test:sync-service && npm run build && npm run test:e2e"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.0",

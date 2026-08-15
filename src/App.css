@@ -118,7 +118,8 @@ h1 {
   color: #f4f0fa;
 }
 .graph-state button,
-.install-button {
+.install-button,
+.sync-proof-card button {
   min-height: 40px;
   padding: 8px 14px;
   border: 1px solid #4b405d;
@@ -128,6 +129,98 @@ h1 {
   font: inherit;
   font-weight: 700;
   cursor: pointer;
+}
+
+.sync-proof-card {
+  width: min(100%, 520px);
+  margin: 20px auto 0;
+  padding: 24px;
+  border: 1px solid #30283e;
+  border-radius: 18px;
+  background: #15111f;
+  box-shadow: 0 18px 45px rgb(0 0 0 / 28%);
+}
+.sync-proof-card h2 {
+  margin: 0;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.8rem;
+  font-weight: 500;
+}
+.sync-proof-copy {
+  margin: 12px 0 20px;
+  color: #bdb3c9;
+  line-height: 1.5;
+}
+.sync-proof-form label {
+  display: block;
+  margin: 14px 0 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+.sync-proof-form input[type='date'],
+.sync-proof-form .input-row {
+  width: 100%;
+  min-height: 44px;
+  border: 2px solid #4b405d;
+  border-radius: 12px;
+  color: #f4f0fa;
+  background: #0f0c16;
+}
+.sync-proof-form input[type='date'] {
+  padding: 8px 12px;
+  font: inherit;
+}
+.sync-proof-form .input-row {
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+.sync-proof-form .input-row input {
+  min-width: 0;
+  flex: 1;
+  border: 0;
+  outline: 0;
+  color: inherit;
+  background: transparent;
+  padding: 8px 12px;
+  font: inherit;
+}
+.sync-proof-form .input-row span {
+  padding-right: 12px;
+  color: #a99db9;
+}
+.sync-proof-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+.sync-proof-card button:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+.sync-proof-card .text-button {
+  margin-top: 12px;
+  padding-inline: 0;
+  border-color: transparent;
+  color: #a99db9;
+  background: transparent;
+}
+.sync-proof-status {
+  min-height: 1.2em;
+  margin: 14px 0 0;
+  color: #a99db9;
+  font-size: 0.82rem;
+}
+.sync-proof-output {
+  margin: 14px 0 0;
+  padding: 12px;
+  overflow: auto;
+  border: 1px solid #383047;
+  border-radius: 10px;
+  color: #e4dcf3;
+  background: #110d19;
+  font-size: 0.76rem;
 }
 
 .plot-readout {

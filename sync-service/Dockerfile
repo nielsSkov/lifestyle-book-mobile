@@ -1,0 +1,8 @@
+FROM node:22-alpine
+
+WORKDIR /app
+COPY credentials.mjs server.mjs ./
+
+ENV NODE_ENV=production
+USER node
+CMD ["node", "server.mjs"]

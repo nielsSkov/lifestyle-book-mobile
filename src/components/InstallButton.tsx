@@ -24,45 +24,51 @@ export function InstallButton() {
 
   if (!prompt && message)
     return (
-      <span className="install-message-inline" role="status">
-        {message}
-      </span>
+      <section className="option-section install-option">
+        <h2>Installation</h2>
+        <span className="install-message-inline" role="status">
+          {message}
+        </span>
+      </section>
     )
   if (!prompt && !isIos) return null
 
   return (
-    <div className="install-control">
-      {!isStandalone ? (
-        <button
-          className="install-button"
-          type="button"
-          onClick={() => {
-            if (!prompt) {
-              setMessage('In Safari, tap Share, then Add to Home Screen.')
-              return
-            }
-            void prompt
-              .prompt()
-              .then(() => prompt.userChoice)
-              .then(({ outcome }) => {
-                setMessage(
-                  outcome === 'accepted' ? 'Installation started.' : 'Installation cancelled.',
-                )
-                if (outcome === 'accepted') setPrompt(null)
-              })
-              .catch(() => setMessage('Installation could not start. Please try again.'))
-          }}
-        >
-          {isIos && !prompt ? 'How to install' : 'Install app'}
-        </button>
-      ) : (
-        <span className="prototype-label">Installed</span>
-      )}
-      {message ? (
-        <span className="install-message" role="status">
-          {message}
-        </span>
-      ) : null}
-    </div>
+    <section className="option-section install-option">
+      <h2>Installation</h2>
+      <div className="install-control">
+        {!isStandalone ? (
+          <button
+            className="install-button"
+            type="button"
+            onClick={() => {
+              if (!prompt) {
+                setMessage('In Safari, tap Share, then Add to Home Screen.')
+                return
+              }
+              void prompt
+                .prompt()
+                .then(() => prompt.userChoice)
+                .then(({ outcome }) => {
+                  setMessage(
+                    outcome === 'accepted' ? 'Installation started.' : 'Installation cancelled.',
+                  )
+                  if (outcome === 'accepted') setPrompt(null)
+                })
+                .catch(() => setMessage('Installation could not start. Please try again.'))
+            }}
+          >
+            {isIos && !prompt ? 'How to install' : 'Install app'}
+          </button>
+        ) : (
+          <span className="prototype-label">Installed</span>
+        )}
+        {message ? (
+          <span className="install-message" role="status">
+            {message}
+          </span>
+        ) : null}
+      </div>
+    </section>
   )
 }

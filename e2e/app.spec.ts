@@ -80,7 +80,7 @@ test('exposes a complete installable manifest', async ({ request }) => {
 })
 
 test('synchronizes a connected Google Drive automatically', async ({ page }) => {
-  const uploads: string[] = []
+  let driveReads = 0
   await page.addInitScript(() => {
     localStorage.setItem('lifestyle-book.google-drive-credential', 'sealed-proof')
   })
@@ -93,11 +93,8 @@ test('synchronizes a connected Google Drive automatically', async ({ page }) => 
   await page.route('https://www.googleapis.com/**', async (route) => {
     const request = route.request()
     const url = new URL(request.url())
-    if (request.method() === 'PATCH') {
-      uploads.push(request.postData() ?? '')
-      return route.fulfill({ status: 200 })
-    }
     if (url.searchParams.get('alt') === 'media') {
+      driveReads += 1
       return route.fulfill({
         contentType: 'text/csv',
         body: 'date,weight_kg\n2026-08-14,77.5\n',
@@ -113,14 +110,14 @@ test('synchronizes a connected Google Drive automatically', async ({ page }) => 
   })
 
   await page.goto('./')
+  await expect.poll(() => driveReads).toBeGreaterThan(0)
+  await page.getByRole('link', { name: 'Options' }).click()
+  await expect(page.getByRole('heading', { name: 'Options' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Google Drive' })).toBeVisible()
+  await expect(page.getByText('Connected', { exact: true })).toBeVisible()
   await expect(page.getByText('Up to date.')).toBeVisible()
-  await expect(page.getByText('2026-08-14,77.5')).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Read shared CSV' })).toHaveCount(0)
-
-  await page.locator('#proof-date').fill('2026-08-15')
-  await page.locator('#proof-weight').fill('77.0')
-  await page.getByRole('button', { name: 'Save test row' }).click()
-  await expect.poll(() => uploads).toContain('date,weight_kg\n2026-08-14,77.5\n2026-08-15,77.0\n')
+  await expect(page.getByText('Synchronization proof')).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'Save test row' })).toHaveCount(0)
 })
 
 type PlotlyElement = HTMLElement & {

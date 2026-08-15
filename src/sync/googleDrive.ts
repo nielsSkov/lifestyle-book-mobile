@@ -2,12 +2,12 @@ const credentialStorageKey = 'lifestyle-book.google-drive-credential'
 const driveApiUrl = 'https://www.googleapis.com/drive/v3'
 const driveUploadUrl = 'https://www.googleapis.com/upload/drive/v3'
 const folderName = 'Lifestyle Book'
-const proofFileName = 'weight.csv'
+const weightFileName = 'weight.csv'
 
 type Fetch = typeof fetch
 type Storage = Pick<globalThis.Storage, 'getItem' | 'setItem' | 'removeItem'>
 
-export class GoogleDriveProofClient {
+export class GoogleDriveClient {
   private readonly serviceUrl: string
   private readonly returnUrl: string
   private readonly storage: Storage
@@ -138,7 +138,7 @@ export class GoogleDriveProofClient {
 
     const files = await this.listFiles(
       accessToken,
-      `name = '${proofFileName}' and '${folderId}' in parents and trashed = false`,
+      `name = '${weightFileName}' and '${folderId}' in parents and trashed = false`,
     )
     this.fileId = files[0]?.id ?? null
     return this.fileId
@@ -148,7 +148,7 @@ export class GoogleDriveProofClient {
     const response = await this.driveRequest(`${driveApiUrl}/files?fields=id`, accessToken, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ name: proofFileName, parents: [folderId], mimeType: 'text/csv' }),
+      body: JSON.stringify({ name: weightFileName, parents: [folderId], mimeType: 'text/csv' }),
     })
     this.fileId = ((await response.json()) as { id: string }).id
     return this.fileId
@@ -174,16 +174,4 @@ export class GoogleDriveProofClient {
     if (!response.ok) throw new Error('Google Drive rejected the request')
     return response
   }
-}
-
-export function updateProofWeightCsv(csv: string, date: string, kilograms: number): string {
-  const records = new Map<string, number>()
-  for (const line of csv.trim().split(/\r?\n/).slice(1)) {
-    const [recordDate, value] = line.split(',')
-    if (recordDate && value && Number.isFinite(Number(value)))
-      records.set(recordDate, Number(value))
-  }
-  records.set(date, kilograms)
-  const lines = [...records].toSorted(([left], [right]) => left.localeCompare(right))
-  return `date,weight_kg\n${lines.map(([recordDate, value]) => `${recordDate},${value.toFixed(1)}`).join('\n')}\n`
 }

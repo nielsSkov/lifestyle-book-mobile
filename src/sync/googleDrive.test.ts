@@ -1,15 +1,11 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { GoogleDriveProofClient, updateProofWeightCsv } from './googleDriveProof'
+import { GoogleDriveClient } from './googleDrive'
 
-describe('Google Drive proof client', () => {
+describe('Google Drive client', () => {
   it('accepts a sealed credential without exposing it in the page URL', () => {
     const storage = memoryStorage()
-    const client = new GoogleDriveProofClient(
-      'https://broker.example',
-      'https://app.example/',
-      storage,
-    )
+    const client = new GoogleDriveClient('https://broker.example', 'https://app.example/', storage)
 
     expect(client.acceptRedirect('#google-drive-credential=sealed-proof')).toEqual({
       connected: true,
@@ -38,7 +34,7 @@ describe('Google Drive proof client', () => {
       }
       return new Response(null, { status: 200 })
     })
-    const client = new GoogleDriveProofClient(
+    const client = new GoogleDriveClient(
       'https://broker.example',
       'https://app.example/',
       storage,
@@ -55,17 +51,6 @@ describe('Google Drive proof client', () => {
     expect(requests.at(-1)?.url).toContain('https://www.googleapis.com/upload/drive/v3')
     expect(requests.at(-1)?.body).toBe('date,weight_kg\n2026-08-15,77.0\n')
     expect(requests.filter(({ url }) => url.startsWith('https://broker.example'))).toHaveLength(1)
-  })
-})
-
-describe('proof Weight CSV', () => {
-  it('adds and replaces dated rows in chronological order', () => {
-    const csv = 'date,weight_kg\n2026-08-15,77.0\n2026-08-13,78.0\n'
-
-    expect(updateProofWeightCsv(csv, '2026-08-14', 77.5)).toBe(
-      'date,weight_kg\n2026-08-13,78.0\n2026-08-14,77.5\n2026-08-15,77.0\n',
-    )
-    expect(updateProofWeightCsv(csv, '2026-08-15', 76.9)).toContain('2026-08-15,76.9')
   })
 })
 

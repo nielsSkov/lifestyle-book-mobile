@@ -32,9 +32,65 @@ h1 {
   text-transform: capitalize;
 }
 
+.options-link {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  place-items: center;
+  border: 1px solid #30283e;
+  border-radius: 12px;
+  color: #a99db9;
+  background: #15111f;
+}
+.options-link svg {
+  width: 21px;
+  height: 21px;
+  fill: none;
+  stroke: currentcolor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.options-link.active {
+  border-color: #59477a;
+  color: #d8c7ff;
+  background: #34205d;
+}
+
+.navigation-bar {
+  padding: 8px 0 12px;
+}
+.section-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  width: min(1100px, calc(100% - 28px));
+  margin: 0 auto;
+  padding: 4px;
+  border: 1px solid #30283e;
+  border-radius: 14px;
+  background: #15111f;
+  box-shadow: 0 12px 30px rgb(0 0 0 / 20%);
+}
+.section-tab {
+  padding: 11px 8px;
+  border-radius: 10px;
+  color: #a99db9;
+  font-size: clamp(0.74rem, 3vw, 0.92rem);
+  font-weight: 750;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.section-tab.active {
+  color: #f8f5fc;
+  background: #34205d;
+  box-shadow: inset 0 0 0 1px rgb(216 199 255 / 12%);
+}
+
 main {
   width: min(1100px, calc(100% - 28px));
-  margin: 26px auto 32px;
+  margin: 8px auto 32px;
 }
 .page-heading {
   display: flex;
@@ -71,6 +127,7 @@ h1 {
   font-size: 0.78rem;
 }
 
+.entry-card,
 .graph-card {
   margin-bottom: 20px;
   padding: 12px;
@@ -79,6 +136,21 @@ h1 {
   border-radius: 18px;
   background: #15111f;
   box-shadow: 0 18px 45px rgb(0 0 0 / 28%);
+}
+.entry-card {
+  width: min(100%, 520px);
+  margin: 0 auto 20px;
+  padding: 24px;
+}
+.heading {
+  display: flex;
+  margin-bottom: 28px;
+  align-items: end;
+  justify-content: space-between;
+  gap: 20px;
+}
+.placeholder-card {
+  min-height: 260px;
 }
 .weight-graph {
   position: relative;
@@ -119,7 +191,7 @@ h1 {
 }
 .graph-state button,
 .install-button,
-.sync-proof-card button {
+.option-section button {
   min-height: 40px;
   padding: 8px 14px;
   border: 1px solid #4b405d;
@@ -130,97 +202,55 @@ h1 {
   font-weight: 700;
   cursor: pointer;
 }
-
-.sync-proof-card {
-  width: min(100%, 520px);
-  margin: 20px auto 0;
-  padding: 24px;
-  border: 1px solid #30283e;
-  border-radius: 18px;
-  background: #15111f;
-  box-shadow: 0 18px 45px rgb(0 0 0 / 28%);
+.option-section {
+  padding: 20px 0;
+  border-top: 1px solid #30283e;
 }
-.sync-proof-card h2 {
-  margin: 0;
+.option-section h2 {
+  margin: 0 0 8px;
   font-family: Georgia, 'Times New Roman', serif;
-  font-size: 1.8rem;
+  font-size: 1.4rem;
   font-weight: 500;
 }
-.sync-proof-copy {
-  margin: 12px 0 20px;
-  color: #bdb3c9;
+.option-help {
+  margin: 0 0 16px;
+  color: #a99db9;
+  font-size: 0.84rem;
   line-height: 1.5;
 }
-.sync-proof-form label {
-  display: block;
-  margin: 14px 0 8px;
-  font-size: 0.9rem;
-  font-weight: 700;
-}
-.sync-proof-form input[type='date'],
-.sync-proof-form .input-row {
-  width: 100%;
-  min-height: 44px;
-  border: 2px solid #4b405d;
-  border-radius: 12px;
-  color: #f4f0fa;
-  background: #0f0c16;
-}
-.sync-proof-form input[type='date'] {
-  padding: 8px 12px;
-  font: inherit;
-}
-.sync-proof-form .input-row {
+.sync-state {
   display: flex;
-  align-items: center;
-  overflow: hidden;
+  margin: 0 0 16px;
+  flex-direction: column;
+  gap: 3px;
 }
-.sync-proof-form .input-row input {
-  min-width: 0;
-  flex: 1;
-  border: 0;
-  outline: 0;
-  color: inherit;
-  background: transparent;
-  padding: 8px 12px;
-  font: inherit;
-}
-.sync-proof-form .input-row span {
-  padding-right: 12px;
+.sync-state span,
+.options-status {
   color: #a99db9;
+  font-size: 0.8rem;
 }
-.sync-proof-actions {
+.option-actions {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 10px;
-  margin-top: 18px;
 }
-.sync-proof-card button:disabled {
+.option-section button:disabled {
   cursor: default;
   opacity: 0.55;
 }
-.sync-proof-card .text-button {
-  margin-top: 12px;
+.option-section .text-button {
   padding-inline: 0;
   border-color: transparent;
   color: #a99db9;
   background: transparent;
 }
-.sync-proof-status {
+.options-status {
   min-height: 1.2em;
   margin: 14px 0 0;
-  color: #a99db9;
-  font-size: 0.82rem;
 }
-.sync-proof-output {
-  margin: 14px 0 0;
-  padding: 12px;
-  overflow: auto;
-  border: 1px solid #383047;
-  border-radius: 10px;
-  color: #e4dcf3;
-  background: #110d19;
-  font-size: 0.76rem;
+.install-option .install-control {
+  justify-content: flex-start;
 }
 
 .plot-readout {

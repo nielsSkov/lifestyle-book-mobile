@@ -12,12 +12,15 @@ export class GoogleDriveProofClient {
   private readonly returnUrl: string
   private readonly storage: Storage
   private readonly request: Fetch
+  private access: { token: string; expiresAt: number } | null = null
+  private folderId: string | null = null
+  private fileId: string | null | undefined
 
   constructor(
     serviceUrl: string,
     returnUrl: string,
     storage: Storage = localStorage,
-    request: Fetch = fetch,
+    request: Fetch = globalThis.fetch.bind(globalThis),
   ) {
     this.serviceUrl = serviceUrl
     this.returnUrl = returnUrl
@@ -88,14 +91,20 @@ export class GoogleDriveProofClient {
   }
 
   private async accessToken(): Promise<string> {
+    if (this.access && this.access.expiresAt > Date.now() + 60_000) return this.access.token
+
     const response = await this.request(new URL('/token', this.serviceUrl), {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ credential: this.credential() }),
     })
     if (!response.ok) throw new Error('Google Drive must be reconnected')
-    const result = (await response.json()) as { accessToken?: string }
+    const result = (await response.json()) as { accessToken?: string; expiresIn?: number }
     if (!result.accessToken) throw new Error('The credential service returned no access token')
+    this.access = {
+      token: result.accessToken,
+      expiresAt: Date.now() + (result.expiresIn ?? 3600) * 1000,
+    }
     return result.accessToken
   }
 
@@ -106,24 +115,33 @@ export class GoogleDriveProofClient {
   }
 
   private async findOrCreateFolder(accessToken: string): Promise<string> {
+    if (this.folderId) return this.folderId
+
     const query = `name = '${folderName}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`
     const existing = await this.listFiles(accessToken, query)
-    if (existing[0]) return existing[0].id
+    if (existing[0]) {
+      this.folderId = existing[0].id
+      return this.folderId
+    }
 
     const response = await this.driveRequest(`${driveApiUrl}/files?fields=id`, accessToken, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ name: folderName, mimeType: 'application/vnd.google-apps.folder' }),
     })
-    return ((await response.json()) as { id: string }).id
+    this.folderId = ((await response.json()) as { id: string }).id
+    return this.folderId
   }
 
   private async findFile(accessToken: string, folderId: string): Promise<string | null> {
+    if (this.fileId !== undefined) return this.fileId
+
     const files = await this.listFiles(
       accessToken,
       `name = '${proofFileName}' and '${folderId}' in parents and trashed = false`,
     )
-    return files[0]?.id ?? null
+    this.fileId = files[0]?.id ?? null
+    return this.fileId
   }
 
   private async createFile(accessToken: string, folderId: string): Promise<string> {
@@ -132,7 +150,8 @@ export class GoogleDriveProofClient {
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ name: proofFileName, parents: [folderId], mimeType: 'text/csv' }),
     })
-    return ((await response.json()) as { id: string }).id
+    this.fileId = ((await response.json()) as { id: string }).id
+    return this.fileId
   }
 
   private async listFiles(accessToken: string, query: string): Promise<Array<{ id: string }>> {

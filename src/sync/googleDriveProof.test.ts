@@ -45,6 +45,7 @@ describe('Google Drive proof client', () => {
       request as typeof fetch,
     )
 
+    await client.readWeightCsv()
     await client.writeWeightCsv('date,weight_kg\n2026-08-15,77.0\n')
 
     expect(requests[0]).toEqual({

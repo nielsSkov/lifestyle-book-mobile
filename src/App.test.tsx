@@ -9,14 +9,14 @@ vi.mock('./components/WeightPlot', () => ({
 import App from './App'
 
 describe('App', () => {
-  it('loads the complete focused prototype', async () => {
+  it('loads an empty local Weight record without manufacturing measurements', async () => {
     render(<App />)
 
     expect(screen.getByRole('heading', { name: 'Weight' })).toBeInTheDocument()
     expect(screen.getByText('Everyday log')).toBeInTheDocument()
     expect(screen.getByText('Daily record')).toBeInTheDocument()
-    expect(await screen.findByText('Plotly weight graph rendered')).toBeInTheDocument()
-    expect(screen.getByText('77.2')).toBeInTheDocument()
+    expect(await screen.findByText('No measurements yet.')).toBeInTheDocument()
+    expect(screen.queryByText('Plotly weight graph rendered')).not.toBeInTheDocument()
   })
 
   it('uses the existing navigation and keeps Google Drive in Options', async () => {

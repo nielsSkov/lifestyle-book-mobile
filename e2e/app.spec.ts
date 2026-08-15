@@ -1,5 +1,6 @@
 import { AxeBuilder } from '@axe-core/playwright'
 import { expect, test } from '@playwright/test'
+import type { Page } from '@playwright/test'
 
 test('presents one responsive and accessible weight experience', async ({ page }) => {
   const externalRequests: string[] = []
@@ -7,7 +8,7 @@ test('presents one responsive and accessible weight experience', async ({ page }
     const url = new URL(request.url())
     if (url.hostname !== '127.0.0.1') externalRequests.push(request.url())
   })
-  await page.goto('./')
+  await seedWeightData(page)
 
   await expect(page.getByRole('heading', { name: 'Weight' })).toBeVisible()
   await expect(page.getByTestId('weight-plot')).toBeVisible()
@@ -21,7 +22,7 @@ test('presents one responsive and accessible weight experience', async ({ page }
 })
 
 test('reloads after the network is disconnected', async ({ page, context }) => {
-  await page.goto('./')
+  await seedWeightData(page)
   await expect(page.getByTestId('weight-plot')).toBeVisible()
   await page.waitForFunction(() => navigator.serviceWorker?.controller !== null)
 
@@ -34,7 +35,7 @@ test('reloads after the network is disconnected', async ({ page, context }) => {
 test('supports Plotly zoom, pan, reset, and focus without substitute controls', async ({
   page,
 }) => {
-  await page.goto('./')
+  await seedWeightData(page)
   const plot = page.getByTestId('weight-plot')
   const dragLayer = page.locator('.nsewdrag')
   await expect(dragLayer).toBeVisible()
@@ -122,4 +123,30 @@ test('synchronizes a connected Google Drive automatically', async ({ page }) => 
 
 type PlotlyElement = HTMLElement & {
   layout: { xaxis: { range: unknown[] } }
+}
+
+async function seedWeightData(page: Page) {
+  await page.goto('./')
+  await page.evaluate(
+    (points) =>
+      new Promise<void>((resolve, reject) => {
+        const request = indexedDB.open('lifestyle-book', 2)
+        request.onerror = () => reject(request.error)
+        request.onsuccess = () => {
+          const database = request.result
+          const transaction = database.transaction('weight-points', 'readwrite')
+          for (const point of points) transaction.objectStore('weight-points').put(point)
+          transaction.onerror = () => reject(transaction.error)
+          transaction.oncomplete = () => {
+            database.close()
+            resolve()
+          }
+        }
+      }),
+    [
+      { date: '2026-07-25', kilograms: 78.1 },
+      { date: '2026-08-14', kilograms: 77.2 },
+    ],
+  )
+  await page.reload()
 }

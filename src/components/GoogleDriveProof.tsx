@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useEffectEvent, useRef, useState } from 'react'
 
 import { GoogleDriveProofClient, updateProofWeightCsv } from '../sync/googleDriveProof'
 
 const serviceUrl = import.meta.env.VITE_GOOGLE_SYNC_SERVICE_URL ?? ''
+const proofCsvStorageKey = 'lifestyle-book.google-drive-proof-csv'
+const emptyCsv = 'date,weight_kg\n'
 
 export function GoogleDriveProof() {
   const [client] = useState(
@@ -15,9 +17,10 @@ export function GoogleDriveProof() {
   const [connected, setConnected] = useState(client.connected)
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10))
   const [kilograms, setKilograms] = useState('77.0')
-  const [csv, setCsv] = useState('')
+  const [csv, setCsv] = useState(() => localStorage.getItem(proofCsvStorageKey) ?? '')
   const [status, setStatus] = useState('')
   const [working, setWorking] = useState(false)
+  const syncInProgress = useRef(false)
 
   useEffect(() => {
     if (!window.location.hash.startsWith('#google-drive-')) return
@@ -26,6 +29,43 @@ export function GoogleDriveProof() {
     setConnected(client.connected)
     setStatus(result.error || (result.connected ? 'Google Drive connected.' : ''))
   }, [client])
+
+  const refreshFromDrive = useEffectEvent(async () => {
+    if (syncInProgress.current || !client.connected) return
+    syncInProgress.current = true
+    setWorking(true)
+    setStatus('Synchronizing...')
+    try {
+      const current = await client.readWeightCsv()
+      localStorage.setItem(proofCsvStorageKey, current)
+      setCsv(current)
+      setStatus('Up to date.')
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : 'Synchronization failed')
+    } finally {
+      syncInProgress.current = false
+      setWorking(false)
+    }
+  })
+
+  useEffect(() => {
+    if (!connected) return
+    const synchronize = () => void refreshFromDrive()
+    const synchronizeWhenVisible = () => {
+      if (document.visibilityState === 'visible') synchronize()
+    }
+    synchronize()
+    const interval = window.setInterval(synchronize, 30_000)
+    window.addEventListener('focus', synchronize)
+    window.addEventListener('online', synchronize)
+    document.addEventListener('visibilitychange', synchronizeWhenVisible)
+    return () => {
+      window.clearInterval(interval)
+      window.removeEventListener('focus', synchronize)
+      window.removeEventListener('online', synchronize)
+      document.removeEventListener('visibilitychange', synchronizeWhenVisible)
+    }
+  }, [connected])
 
   if (!client.configured) return null
 
@@ -78,19 +118,12 @@ export function GoogleDriveProof() {
           <div className="sync-proof-actions">
             <button
               type="button"
-              disabled={working}
-              onClick={() =>
-                void run(async () => {
-                  setCsv(await client.readWeightCsv())
-                })
-              }
-            >
-              Read shared CSV
-            </button>
-            <button
-              type="button"
               disabled={working || !date || !Number.isFinite(Number(kilograms))}
-              onClick={() =>
+              onClick={() => {
+                const local = updateProofWeightCsv(csv || emptyCsv, date, Number(kilograms))
+                localStorage.setItem(proofCsvStorageKey, local)
+                setCsv(local)
+                setStatus('Saved locally. Synchronizing...')
                 void run(async () => {
                   const updated = updateProofWeightCsv(
                     await client.readWeightCsv(),
@@ -98,11 +131,12 @@ export function GoogleDriveProof() {
                     Number(kilograms),
                   )
                   await client.writeWeightCsv(updated)
+                  localStorage.setItem(proofCsvStorageKey, updated)
                   setCsv(updated)
                 })
-              }
+              }}
             >
-              Write test row
+              Save test row
             </button>
           </div>
           <button
@@ -112,7 +146,6 @@ export function GoogleDriveProof() {
             onClick={() => {
               client.forget()
               setConnected(false)
-              setCsv('')
               setStatus('Connection forgotten on this device.')
             }}
           >

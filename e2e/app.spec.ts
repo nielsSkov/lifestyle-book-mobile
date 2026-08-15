@@ -79,6 +79,50 @@ test('exposes a complete installable manifest', async ({ request }) => {
   }
 })
 
+test('synchronizes a connected Google Drive automatically', async ({ page }) => {
+  const uploads: string[] = []
+  await page.addInitScript(() => {
+    localStorage.setItem('lifestyle-book.google-drive-credential', 'sealed-proof')
+  })
+  await page.route('https://broker.example/token', (route) =>
+    route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ accessToken: 'proof-access', expiresIn: 3600 }),
+    }),
+  )
+  await page.route('https://www.googleapis.com/**', async (route) => {
+    const request = route.request()
+    const url = new URL(request.url())
+    if (request.method() === 'PATCH') {
+      uploads.push(request.postData() ?? '')
+      return route.fulfill({ status: 200 })
+    }
+    if (url.searchParams.get('alt') === 'media') {
+      return route.fulfill({
+        contentType: 'text/csv',
+        body: 'date,weight_kg\n2026-08-14,77.5\n',
+      })
+    }
+    const query = url.searchParams.get('q') ?? ''
+    return route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({
+        files: [{ id: query.includes('mimeType') ? 'folder-id' : 'file-id' }],
+      }),
+    })
+  })
+
+  await page.goto('./')
+  await expect(page.getByText('Up to date.')).toBeVisible()
+  await expect(page.getByText('2026-08-14,77.5')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Read shared CSV' })).toHaveCount(0)
+
+  await page.locator('#proof-date').fill('2026-08-15')
+  await page.locator('#proof-weight').fill('77.0')
+  await page.getByRole('button', { name: 'Save test row' }).click()
+  await expect.poll(() => uploads).toContain('date,weight_kg\n2026-08-14,77.5\n2026-08-15,77.0\n')
+})
+
 type PlotlyElement = HTMLElement & {
   layout: { xaxis: { range: unknown[] } }
 }
